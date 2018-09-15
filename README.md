@@ -1,6 +1,6 @@
 # Iris Recognition
 
-I build an `Iris-Recognition system`, implemented on both Matlab and Python languages.
+I build an `Iris-Recognition system`, implemented in both Matlab and Python languages.
 #### Keyword: Iris Recognition, Biometrics, Computer Vision, Image Processing, Daugman
 
 
