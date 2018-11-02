@@ -15,7 +15,7 @@ from glob import glob
 from tqdm import tqdm
 from time import time
 from scipy.io import savemat
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, Pool
 
 from fnc.extractFeature import extractFeature
 
@@ -38,22 +38,35 @@ args = parser.parse_args()
 
 
 ##-----------------------------------------------------------------------------
+##  Pool function
+##-----------------------------------------------------------------------------
+def pool_func(file):
+	template, mask, filename = extractFeature(file, use_multiprocess=False)
+	basename = os.path.basename(file)
+	out_file = os.path.join(args.temp_dir, "%s.mat" % (basename))
+	savemat(out_file, mdict={'template': template, 'mask': mask})
+
+
+##-----------------------------------------------------------------------------
 ##  Execution
 ##-----------------------------------------------------------------------------
 start = time()
+
+# Check the existence of temp_dir
+if not os.path.exists(args.temp_dir):
+	print("makedirs", args.temp_dir)
+	os.makedirs(args.temp_dir)
 
 # Get list of files for enrolling template, just "*010*.jpg" files are selected
 files = glob(os.path.join(args.data_dir, "*010*.bmp"))
 n_files = len(files)
 print("Number of files for enrolling:", n_files)
 
-# Enroll
+# Parallel pools to enroll templates
 print("Start enrolling...")
-for file in tqdm(files, total=n_files):
-	template, mask, filename = extractFeature(file)
-	basename = os.path.basename(file)
-	out_file = os.path.join(args.temp_dir, "%s.mat" % (basename))
-	savemat(out_file, mdict={'template': template, 'mask': mask})
+pools = Pool(processes=args.n_cores)
+for _ in tqdm(pools.imap_unordered(pool_func, files), total=n_files):
+	pass
 
 end = time()
 print('\n>>> Enrollment time: {} [s]\n'.format(end-start))

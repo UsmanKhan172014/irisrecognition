@@ -12,10 +12,9 @@
 ##-----------------------------------------------------------------------------
 import argparse, os
 from time import time
-import scipy.io as sio
+from scipy.io import savemat
 
 from fnc.extractFeature import extractFeature
-from path import temp_database_path
 
 
 #------------------------------------------------------------------------------
@@ -26,7 +25,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--file", type=str,
                     help="Path to the file that you want to verify.")
 
-parser.add_argument("--temp_dir", type=str, default="./templates/",
+parser.add_argument("--temp_dir", type=str, default="./templates/temp/",
 					help="Path to the directory containing templates.")
 
 args = parser.parse_args()
@@ -43,8 +42,8 @@ template, mask, file = extractFeature(args.file)
 
 # Save extracted feature
 basename = os.path.basename(file)
-out_file = os.path.join(temp_database_path, "%s.mat" % (basename))
-sio.savemat(out_file, mdict={'template':template, 'mask':mask})
+out_file = os.path.join(args.temp_dir, "%s.mat" % (basename))
+savemat(out_file, mdict={'template':template, 'mask':mask})
 print('>>> Template is saved in %s' % (out_file))
 
 end = time()

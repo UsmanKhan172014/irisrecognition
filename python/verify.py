@@ -44,7 +44,7 @@ template, mask, file = extractFeature(args.file)
 
 
 # Matching
-result = matching(template, mask, args.temp_dir, 0.38)
+result = matching(template, mask, args.temp_dir, args.thres)
 
 if result == -1:
 	print('>>> No registered sample.')
