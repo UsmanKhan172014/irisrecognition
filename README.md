@@ -49,13 +49,12 @@ III.1.Matlab
 III.2.Python
 ------------
 * The OS, which I'm using, is Ubuntu 16.04. In addition, the Python interpreter is Python 3.5.
-* First, create a virtual environment, named `cv`, and install OpenCV library on `cv` using [this link](https://www.pyimagesearch.com/2016/10/24/ubuntu-16-04-how-to-install-opencv/).
-* Then, install some python packages inside `cv` using pip:
+* First, create a virtual environment using [this link](https://docs.python-guide.org/dev/virtualenvs/#lower-level-virtualenv). In my case, the virtual environment is *iris*.
+* Then, change the current working directory to "project_dir/python/" and install some python packages for the created virtual environment.
 ```
-workon cv
-pip install numpy
-pip install scipy
-pip install scikit-image
+workon iris
+cd Iris-Recognition/python/
+pip install -r requirements.txt
 ```
 
 
