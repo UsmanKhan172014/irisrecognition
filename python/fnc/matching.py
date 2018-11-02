@@ -15,15 +15,14 @@ import numpy as np
 from os import listdir
 from fnmatch import filter
 import scipy.io as sio
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from itertools import repeat
-from path import temp_database_path
 
 
 ##-----------------------------------------------------------------------------
 ##  Function
 ##-----------------------------------------------------------------------------
-def matching(template_extr, mask_extr, threshold):
+def matching(template_extr, mask_extr, temp_dir, threshold=0.38):
 	"""
 	Description:
 		Match the extracted template with database.
@@ -32,41 +31,41 @@ def matching(template_extr, mask_extr, threshold):
 		template_extr	- Extracted template.
 		mask_extr		- Extracted mask.
 		threshold		- Threshold of distance.
+		temp_dir		- Directory contains templates.
 
 	Output:
-		id_acc			- ID of the matched account, 0 if not, -1 if error.
+		List of strings of matched files, 0 if not, -1 if no registered sample.
 	"""
 	# Get the number of accounts in the database
-	numfile = len(filter(listdir(temp_database_path), '*.mat'))
-	if numfile == 0:
-		id_acc = -1
-		return id_acc
+	n_files = len(filter(listdir(temp_dir), '*.mat'))
+	if n_files == 0:
+		return -1
 
-	# Parallel computation: Calculate the Hamming distance
-	args = zip(listdir(temp_database_path), repeat(template_extr), repeat(mask_extr))
-	with Pool(processes=4) as pool:
-		hm_dist_list = pool.starmap(matchingPool, args)
+	# Use all cores to calculate Hamming distances
+	args = zip(
+		sorted(listdir(temp_dir)),
+		repeat(template_extr),
+		repeat(mask_extr),
+		repeat(temp_dir),
+	)
+	with Pool(processes=cpu_count()) as pools:
+		result_list = pools.starmap(matchingPool, args)
 
-	# Post-procedure
-	hm_dist = []
-	filename = []
-	for i in range(len(hm_dist_list)):
-		ele = hm_dist_list[i]
-		filename.append(ele[0])
-		hm_dist.append(ele[1])
+	filenames = [result_list[i][0] for i in range(len(result_list))]
+	hm_dists = [result_list[i][1] for i in range(len(result_list))]
 
 	# Threshold and give the result ID
-	hm_dist = np.array(hm_dist)
-	id_acc = np.where(hm_dist <= threshold)		# default=0.38
-	if len(id_acc[0]) < 1:
-		id_acc = 0
-		return id_acc
-	elif len(id_acc[0]) > 1:
-		id_acc = -1
-		return id_acc
+	hm_dists = np.array(hm_dists)
+	ind_thres = np.where(hm_dists<=threshold)[0]
 
 	# Return
-	return int(filename[id_acc[0][0]][:-4])
+	if len(ind_thres)==0:
+		return 0
+	else:
+		hm_dists = hm_dists[ind_thres]
+		filenames = [filenames[idx] for idx in ind_thres]
+		ind_sort = np.argsort(hm_dists)
+		return [filenames[idx] for idx in ind_sort]
 
 
 #------------------------------------------------------------------------------
@@ -152,7 +151,7 @@ def shiftbits(template, noshifts):
 
 
 #------------------------------------------------------------------------------
-def matchingPool(file_temp_name, template_extr, mask_extr):
+def matchingPool(file_temp_name, template_extr, mask_extr, temp_dir):
 	"""
 	Description:
 		Perform matching session within a Pool of parallel computation
@@ -166,7 +165,7 @@ def matchingPool(file_temp_name, template_extr, mask_extr):
 		hm_dist			- Hamming distance
 	"""
 	# Load each account
-	data_template = sio.loadmat('%s%s'% (temp_database_path, file_temp_name))
+	data_template = sio.loadmat('%s%s'% (temp_dir, file_temp_name))
 	template = data_template['template']
 	mask = data_template['mask']
 

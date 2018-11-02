@@ -10,50 +10,54 @@
 ##-----------------------------------------------------------------------------
 ##  Import
 ##-----------------------------------------------------------------------------
+import argparse
+from time import time
+
 from fnc.extractFeature import extractFeature
 from fnc.matching import matching
-from time import time
-from path import image_database_path
-from sys import argv, exit
-from os.path import exists
+
+
+#------------------------------------------------------------------------------
+#	Argument parsing
+#------------------------------------------------------------------------------
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--file", type=str,
+                    help="Path to the file that you want to verify.")
+
+parser.add_argument("--temp_dir", type=str, default="./templates/",
+					help="Path to the directory containing templates.")
+
+parser.add_argument("--thres", type=float, default=0.38,
+					help="Threshold for matching.")
+
+args = parser.parse_args()
 
 
 ##-----------------------------------------------------------------------------
 ##  Execution
 ##-----------------------------------------------------------------------------
-# Get the argument
-if len(argv)==2:
-	filename = '%s%s' % (image_database_path, argv[1])
-	if not exists(filename):
-		print(">>> Wrong file!\n")
-		exit()
-elif len(argv)==1:
-	filename = '%s001_1_1.jpg' % image_database_path
-else:
-	print(">>>Wrong syntax!\n")
-	exit()
-
-
 # Extract feature
 start = time()
-print('>>> Start verifying {}'.format(filename))
-template, mask, filename = extractFeature(filename)
+print('>>> Start verifying {}\n'.format(args.file))
+template, mask, file = extractFeature(args.file)
 
 
 # Matching
-id_acc = matching(template, mask, 0.42)
+result = matching(template, mask, args.temp_dir, args.thres)
 
-if id_acc == -1:
-	print('>>> Error!')
+if result == -1:
+	print('>>> No registered sample.')
 
-elif id_acc == 0:
-	print('>>> No matched!')
+elif result == 0:
+	print('>>> No sample matched.')
 
 else:
-	print('>>> ID {} is matched!'.format(str(id_acc)))
+	print('>>> {} samples matched (descending reliability):'.format(len(result)))
+	for res in result:
+		print("\t", res)
 
 
 # Time measure
 end = time()
-print('>>> Verification time: {} [s]\n'.format(end - start))
-
+print('\n>>> Verification time: {} [s]\n'.format(end - start))

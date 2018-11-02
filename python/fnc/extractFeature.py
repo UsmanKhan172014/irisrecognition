@@ -19,18 +19,19 @@ from fnc.encode import encode
 ##-----------------------------------------------------------------------------
 ##  Function
 ##-----------------------------------------------------------------------------
-def extractFeature(im_filename):
+def extractFeature(im_filename, use_multiprocess=True):
 	"""
 	Description:
 		Extract features from an iris image
 
 	Input:
-		im_filename	- The input iris image
+		im_filename			- The input iris image
+		use_multiprocess	- Use multiprocess to run
 
 	Output:
-		template	- The extracted template
-		mask		- The extracted mask
-		im_filename	- The input iris image
+		template			- The extracted template
+		mask				- The extracted mask
+		im_filename			- The input iris image
 	"""
 	# Normalisation parameters
 	radial_res = 20
@@ -43,7 +44,7 @@ def extractFeature(im_filename):
 
 	# Perform segmentation
 	im = imread(im_filename, 0)
-	ciriris, cirpupil, imwithnoise = segment(im)
+	ciriris, cirpupil, imwithnoise = segment(im, use_multiprocess)
 
 	# Perform normalization
 	polar_array, noise_array = normalize(imwithnoise, ciriris[1], ciriris[0], ciriris[2],
