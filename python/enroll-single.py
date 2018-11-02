@@ -10,58 +10,42 @@
 ##-----------------------------------------------------------------------------
 ##  Import
 ##-----------------------------------------------------------------------------
-from fnc.extractFeature import extractFeature
-from path import image_database_path, temp_database_path
+import argparse, os
 from time import time
 import scipy.io as sio
-from sys import argv, exit
-from os.path import exists
+
+from fnc.extractFeature import extractFeature
+from path import temp_database_path
 
 
-##-----------------------------------------------------------------------------
-##  Function
-##-----------------------------------------------------------------------------
-def getIDFile(filename):
-    """
-    Description:
-        Get ID string of the file name.
+#------------------------------------------------------------------------------
+#	Argument parsing
+#------------------------------------------------------------------------------
+parser = argparse.ArgumentParser()
 
-    Input:
-        filename    - The input image file name.
+parser.add_argument("--file", type=str,
+                    help="Path to the file that you want to verify.")
 
-    Output:
-        id	        - The ID string corresponding to the file nam.
-    """
-    id = filename[-11:-8]
-    id = int(id)
-    id = str(id)
-    return id
+parser.add_argument("--temp_dir", type=str, default="./templates/",
+					help="Path to the directory containing templates.")
+
+args = parser.parse_args()
 
 
 ##-----------------------------------------------------------------------------
 ##  Execution
 ##-----------------------------------------------------------------------------
-# Get the argument
-if len(argv)==2:
-	filename = '%s%s' % (image_database_path, argv[1])
-	if not exists(filename):
-		print(">>> Wrong file!\n")
-		exit()
-elif len(argv)==1:
-	filename = '%s001_1_1.jpg' % image_database_path
-else:
-	print(">>>Wrong syntax!\n")
-	exit()
+start = time()
 
 # Extract feature
-print('>>> Enroll for the file ', filename)
-start = time()
-template, mask, filename = extractFeature(filename)
+print('>>> Enroll for the file ', args.file)
+template, mask, file = extractFeature(args.file)
+
+# Save extracted feature
+basename = os.path.basename(file)
+out_file = os.path.join(temp_database_path, "%s.mat" % (basename))
+sio.savemat(out_file, mdict={'template':template, 'mask':mask})
+print('>>> Template is saved in %s' % (out_file))
+
 end = time()
 print('>>> Enrollment time: {} [s]\n'.format(end-start))
-
-
-# Save
-sio.savemat('%s{}.mat'.format(getIDFile(filename)) % temp_database_path,
-            mdict={'template':template, 'mask':mask})
-
