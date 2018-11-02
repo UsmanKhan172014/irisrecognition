@@ -18,15 +18,16 @@ import multiprocessing as mp
 ##-----------------------------------------------------------------------------
 ##  Function
 ##-----------------------------------------------------------------------------
-def segment(eyeim, use_multiprocess=True):
+def segment(eyeim, eyelashes_thres=80, use_multiprocess=True):
 	"""
 	Description:
 		Segment the iris region from the eye image.
 		Indicate the noise region.
 
 	Input:
-		eyeim		       - Eye image
-		use_multiprocess   - Use multiprocess to run
+		eyeim				- Eye image
+		eyelashes_thres   	- Eyelashes threshold
+		use_multiprocess   	- Use multiprocess to run
 
 	Output:
 		ciriris		- Centre coordinates and radius of iris boundary.
@@ -92,7 +93,7 @@ def segment(eyeim, use_multiprocess=True):
 	imwithnoise = imwithnoise + mask_top + mask_bot
 
 	# For CASIA, eliminate eyelashes by threshold
-	ref = eyeim < 80
+	ref = eyeim < eyelashes_thres
 	coords = np.where(ref == 1)
 	imwithnoise[coords] = np.nan
 

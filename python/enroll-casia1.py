@@ -41,7 +41,7 @@ args = parser.parse_args()
 ##  Pool function
 ##-----------------------------------------------------------------------------
 def pool_func(file):
-	template, mask, filename = extractFeature(file, use_multiprocess=False)
+	template, mask, _ = extractFeature(file, use_multiprocess=False)
 	basename = os.path.basename(file)
 	out_file = os.path.join(args.temp_dir, "%s.mat" % (basename))
 	savemat(out_file, mdict={'template': template, 'mask': mask})

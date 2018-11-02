@@ -176,4 +176,3 @@ def circlecoords(c, r, imgsize, nsides=600):
 	x = np.round(xd2).astype(int)
 	y = np.round(yd2).astype(int)
 	return x,y
-

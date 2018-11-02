@@ -17,6 +17,23 @@ from fnc.encode import encode
 
 
 ##-----------------------------------------------------------------------------
+##  Parameters for extracting feature
+##	(The following parameters are default for CASIA1 dataset)
+##-----------------------------------------------------------------------------
+# Segmentation parameters
+eyelashes_thres = 80
+
+# Normalisation parameters
+radial_res = 20
+angular_res = 240
+
+# Feature encoding parameters
+minWaveLength = 18
+mult = 1
+sigmaOnf = 0.5
+
+
+##-----------------------------------------------------------------------------
 ##  Function
 ##-----------------------------------------------------------------------------
 def extractFeature(im_filename, use_multiprocess=True):
@@ -33,18 +50,9 @@ def extractFeature(im_filename, use_multiprocess=True):
 		mask				- The extracted mask
 		im_filename			- The input iris image
 	"""
-	# Normalisation parameters
-	radial_res = 20
-	angular_res = 240
-
-	# Feature encoding parameters
-	minWaveLength = 18
-	mult = 1
-	sigmaOnf = 0.5
-
 	# Perform segmentation
 	im = imread(im_filename, 0)
-	ciriris, cirpupil, imwithnoise = segment(im, use_multiprocess)
+	ciriris, cirpupil, imwithnoise = segment(im, eyelashes_thres, use_multiprocess)
 
 	# Perform normalization
 	polar_array, noise_array = normalize(imwithnoise, ciriris[1], ciriris[0], ciriris[2],
@@ -56,4 +64,3 @@ def extractFeature(im_filename, use_multiprocess=True):
 
 	# Return
 	return template, mask, im_filename
-

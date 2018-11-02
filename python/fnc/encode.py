@@ -108,4 +108,3 @@ def gaborconvolve(im, minWaveLength, mult, sigmaOnf):
 
 	# Return
 	return filterbank
-
