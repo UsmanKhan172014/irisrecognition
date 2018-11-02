@@ -18,6 +18,9 @@ import scipy.io as sio
 from multiprocessing import Pool, cpu_count
 from itertools import repeat
 
+import warnings
+warnings.filterwarnings("ignore")
+
 
 ##-----------------------------------------------------------------------------
 ##  Function
@@ -52,10 +55,14 @@ def matching(template_extr, mask_extr, temp_dir, threshold=0.38):
 		result_list = pools.starmap(matchingPool, args)
 
 	filenames = [result_list[i][0] for i in range(len(result_list))]
-	hm_dists = [result_list[i][1] for i in range(len(result_list))]
+	hm_dists = np.array([result_list[i][1] for i in range(len(result_list))])
+
+	# Remove NaN elements
+	ind_valid = np.where(hm_dists>0)[0]
+	hm_dists = hm_dists[ind_valid]
+	filenames = [filenames[idx] for idx in ind_valid]
 
 	# Threshold and give the result ID
-	hm_dists = np.array(hm_dists)
 	ind_thres = np.where(hm_dists<=threshold)[0]
 
 	# Return
@@ -99,7 +106,7 @@ def calHammingDist(template1, mask1, template2, mask2):
 		C = np.logical_and(C, np.logical_not(mask))
 		bitsdiff = np.sum(C==1)
 
-		if totalbits == 0:
+		if totalbits==0:
 			hd = np.nan
 		else:
 			hd1 = bitsdiff / totalbits
@@ -172,4 +179,3 @@ def matchingPool(file_temp_name, template_extr, mask_extr, temp_dir):
 	# Calculate the Hamming distance
 	hm_dist = calHammingDist(template_extr, mask_extr, template, mask)
 	return (file_temp_name, hm_dist)
-

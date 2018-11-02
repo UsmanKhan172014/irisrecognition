@@ -57,8 +57,12 @@ if not os.path.exists(args.temp_dir):
 	print("makedirs", args.temp_dir)
 	os.makedirs(args.temp_dir)
 
-# Get list of files for enrolling template, just "*010*.jpg" files are selected
+# Get list of files for enrolling template.
+# Just "*010*.jpg" files are selected.
+# In addition, 50th samples are not used.
 files = glob(os.path.join(args.data_dir, "*010*.bmp"))
+files = [file for file in files if "01020" not in file]
+files = [file for file in files if "5002" not in file]
 n_files = len(files)
 print("Number of files for enrolling:", n_files)
 
