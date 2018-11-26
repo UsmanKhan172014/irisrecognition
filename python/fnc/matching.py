@@ -89,7 +89,7 @@ def calHammingDist(template1, mask1, template2, mask2):
 		mask1s = shiftbits(mask1, shifts)
 
 		mask = np.logical_or(mask1s, mask2)
-		nummaskbits = np.sum(mask == 1)
+		nummaskbits = np.sum(mask==1)
 		totalbits = template1s.size - nummaskbits
 
 		C = np.logical_xor(template1s, template2)
