@@ -4,6 +4,10 @@ I have made `Iris-Recognition system`, implemented in both Matlab and Python.
 #### Keyword: Iris Recognition, Biometrics, Computer Vision, Image Processing, Daugman
 
 
+## Updates
+:tada::tada::tada: **21/08/2019**: I have already created a new repository for solving Iris Recognition by using Deep Learning in https://github.com/AntiAegis/Iris-Recognition-PyTorch.
+
+
 Table of contents
 =================
 - [Iris Recognition](#iris-recognition)
